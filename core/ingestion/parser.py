@@ -87,7 +87,7 @@ class CodeParser:
                     start_line = node.lineno - 1
                     end_line = node.end_lineno or len(lines)
                     func_code = '\n'.join(lines[start_line:end_line])
-                    metadata = {
+                    func_metadata: Dict[str, Any] = {
                         'file_path': str(p),
                         'type': 'function',
                         'name': node.name,
@@ -95,13 +95,13 @@ class CodeParser:
                         'end_line': end_line,
                         **project_info,
                     }
-                    chunks.append((func_code, metadata))
+                    chunks.append((func_code, func_metadata))
                 elif isinstance(node, ast.ClassDef):
                     start_line = node.lineno - 1
                     end_line = node.end_lineno or len(lines)
                     class_code = '\n'.join(lines[start_line:end_line])
                     methods = [m.name for m in node.body if isinstance(m, ast.FunctionDef)]
-                    metadata = {
+                    class_metadata: Dict[str, Any] = {
                         'file_path': str(p),
                         'type': 'class',
                         'name': node.name,
@@ -110,15 +110,15 @@ class CodeParser:
                         'end_line': end_line,
                         **project_info,
                     }
-                    chunks.append((class_code, metadata))
+                    chunks.append((class_code, class_metadata))
         except SyntaxError:
-            metadata = {
+            file_metadata: Dict[str, Any] = {
                 'file_path': str(p),
                 'type': 'file',
                 'name': p.stem,
                 **project_info,
             }
-            chunks.append((content, metadata))
+            chunks.append((content, file_metadata))
         return chunks
 
     @staticmethod
