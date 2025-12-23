@@ -2,7 +2,6 @@ from fastapi.testclient import TestClient
 
 import server.app as server_app
 
-
 class FakeCodebaseIntelligence:
     def __init__(self):
         self._initialized = False
