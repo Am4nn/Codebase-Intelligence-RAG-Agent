@@ -10,12 +10,14 @@ Endpoints:
     POST /export - Export change log
 """
 import logging
-from typing import Optional
+from typing import Any, Optional
 from contextlib import asynccontextmanager
+from collections.abc import AsyncIterator
 from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
+from starlette.requests import Request
 from core import CodebaseIntelligence
 
 def configure_logging(level: int = logging.INFO) -> None:
@@ -40,7 +42,7 @@ system: Optional[CodebaseIntelligence] = None
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     """Lifespan event handler for startup and shutdown."""
     global system
     
@@ -152,7 +154,7 @@ class ClearConversationResponse(BaseModel):
 # ============================================================================
 
 @app.get("/", tags=["General"])
-async def root():
+async def root() -> dict[str, Any]:
     """Root endpoint with API information."""
     return {
         "name": "Codebase Intelligence API",
@@ -173,7 +175,7 @@ async def root():
     }
 
 @app.get("/health", response_model=HealthResponse, tags=["General"])
-async def health_check():
+async def health_check() -> HealthResponse:
     """
     Health check endpoint.
     
@@ -185,7 +187,7 @@ async def health_check():
     )
 
 @app.get("/status", response_model=StatusResponse, tags=["General"])
-async def get_status():
+async def get_status() -> StatusResponse:
     """
     Get system status.
     
@@ -204,7 +206,7 @@ async def get_status():
     )
 
 @app.post("/query", response_model=QueryResponse, tags=["Query"])
-async def query_codebase(request: QueryRequest):
+async def query_codebase(request: QueryRequest) -> QueryResponse:
     """
     Query the codebase with a natural language question.
     
@@ -241,7 +243,7 @@ async def query_codebase(request: QueryRequest):
         )
 
 @app.post("/export", response_model=ExportResponse, tags=["Export"])
-async def export_change_log(background_tasks: BackgroundTasks, output_file: str = "change_log.json"):
+async def export_change_log(background_tasks: BackgroundTasks, output_file: str = "change_log.json") -> ExportResponse:
     """
     Export the agent's change log to a file.
     
@@ -277,7 +279,7 @@ async def export_change_log(background_tasks: BackgroundTasks, output_file: str 
         )
 
 @app.get("/conversations", response_model=ConversationListResponse, tags=["Conversations"])
-async def list_conversations():
+async def list_conversations() -> ConversationListResponse:
     """
     List all conversation IDs.
     
@@ -307,7 +309,7 @@ async def list_conversations():
         )
 
 @app.get("/conversations/{conversation_id}/history", response_model=ConversationHistoryResponse, tags=["Conversations"])
-async def get_conversation_history(conversation_id: str):
+async def get_conversation_history(conversation_id: str) -> ConversationHistoryResponse:
     """
     Get the full conversation history for a specific conversation ID.
     
@@ -341,7 +343,7 @@ async def get_conversation_history(conversation_id: str):
         )
 
 @app.get("/conversations/{conversation_id}/state", response_model=ConversationStateResponse, tags=["Conversations"])
-async def get_conversation_state(conversation_id: str):
+async def get_conversation_state(conversation_id: str) -> ConversationStateResponse:
     """
     Get the complete state/checkpoint for a conversation.
     
@@ -375,7 +377,7 @@ async def get_conversation_state(conversation_id: str):
         )
 
 @app.get("/conversations/{conversation_id}/summary", response_model=ConversationSummaryResponse, tags=["Conversations"])
-async def get_conversation_summary(conversation_id: str):
+async def get_conversation_summary(conversation_id: str) -> ConversationSummaryResponse:
     """
     Get a summary of a conversation including message count and participants.
     
@@ -405,7 +407,7 @@ async def get_conversation_summary(conversation_id: str):
         )
 
 @app.delete("/conversations/{conversation_id}", response_model=ClearConversationResponse, tags=["Conversations"])
-async def clear_conversation(conversation_id: str):
+async def clear_conversation(conversation_id: str) -> ClearConversationResponse:
     """
     Clear/delete a specific conversation history.
     
@@ -451,7 +453,7 @@ async def clear_conversation(conversation_id: str):
 # ============================================================================
 
 @app.exception_handler(404)
-async def not_found_handler(request, exc):
+async def not_found_handler(request: Request, exc: Exception) -> JSONResponse:
     """Handle 404 errors."""
     return JSONResponse(
         status_code=404,
@@ -464,7 +466,7 @@ async def not_found_handler(request, exc):
 
 
 @app.exception_handler(500)
-async def internal_error_handler(request, exc):
+async def internal_error_handler(request: Request, exc: Exception) -> JSONResponse:
     """Handle 500 errors."""
     logger.exception("Internal server error")
     return JSONResponse(

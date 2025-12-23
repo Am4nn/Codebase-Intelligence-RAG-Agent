@@ -4,13 +4,12 @@ Core API for Codebase Intelligence System
 This is the main black-box API that can be used by any interface (CLI, web server, UI, etc.)
 """
 import logging
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, cast
 from core.ingestion import CodebaseLoader, SemanticChunker
 from core.storage import CodeVectorStore
 from core.agents import CodebaseRAGAgent
 from typing import TYPE_CHECKING
-from langgraph.types import Checkpointer
-
+from langchain_core.runnables import RunnableConfig
 from core.utils.fs import db_persist_directory, projects_directory
 
 if TYPE_CHECKING:
@@ -188,14 +187,14 @@ class CodebaseIntelligence:
         
         try:
             checkpointer = self.agent.agent.checkpointer
-            if checkpointer is None:
+            if checkpointer is None or isinstance(checkpointer, bool):
                 logger.warning("No checkpointer available")
                 return []
             
-            config = {"configurable": {"thread_id": conversation_id}}
+            config: RunnableConfig = {"configurable": {"thread_id": conversation_id}}
             
             # Get the checkpoint for this conversation
-            checkpoint = await checkpointer.aget(config) # type: ignore
+            checkpoint = await checkpointer.aget(config)
             
             if checkpoint is None:
                 return []
@@ -242,7 +241,7 @@ class CodebaseIntelligence:
             # InMemorySaver stores checkpoints in memory
             # Access the internal storage to list all conversation IDs
             if hasattr(checkpointer, 'storage'):
-                return list(checkpointer.storage.keys())  # type: ignore
+                return list(getattr(checkpointer, 'storage').keys())
             else:
                 logger.warning("Checkpointer does not expose storage. Cannot list conversations.")
                 return []
@@ -270,12 +269,12 @@ class CodebaseIntelligence:
         
         try:
             checkpointer = self.agent.agent.checkpointer
-            if checkpointer is None:
+            if checkpointer is None or isinstance(checkpointer, bool):
                 logger.warning("No checkpointer available")
                 return None
             
-            config = {"configurable": {"thread_id": conversation_id}}
-            checkpoint = await checkpointer.aget(config)  # type: ignore
+            config: RunnableConfig = {"configurable": {"thread_id": conversation_id}}
+            checkpoint = await checkpointer.aget(config)
             
             if checkpoint is None:
                 return None
@@ -318,9 +317,9 @@ class CodebaseIntelligence:
             # InMemorySaver stores data in memory, we can remove it
             if hasattr(checkpointer, 'storage'):
                 # Remove the conversation from storage
-                keys_to_remove = [k for k in checkpointer.storage.keys() if conversation_id in str(k)]  # type: ignore
+                keys_to_remove = [k for k in getattr(checkpointer, 'storage').keys() if conversation_id in str(k)]
                 for key in keys_to_remove:
-                    del checkpointer.storage[key]  # type: ignore
+                    del getattr(checkpointer, 'storage')[key]
                 logger.info(f"Cleared conversation: {conversation_id}")
                 return True
             else:
@@ -358,7 +357,7 @@ class CodebaseIntelligence:
             }
         
         # Count messages by role
-        role_counts = {}
+        role_counts: dict[str, int] = {}
         for msg in history:
             role = msg.get("role", "unknown")
             role_counts[role] = role_counts.get(role, 0) + 1

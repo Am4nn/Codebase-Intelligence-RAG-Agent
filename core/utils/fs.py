@@ -6,7 +6,7 @@ logger = logging.getLogger(__name__)
 
 def fin_root() -> str:
     """Return the root directory of the project."""
-    return str(Path(__file__).parent.parent.resolve())
+    return str(Path(__file__).parent.parent.parent.resolve())
 
 def projects_directory() -> str:
     """Return the preferred projects root directory."""
@@ -21,5 +21,5 @@ def projects_directory() -> str:
 def db_persist_directory() -> str:
     """Return the default directory for vector store persistence."""
     base = Path(fin_root())
-    candidate = base / "storage" / "codebase_intelligence_db"
+    candidate = base / "data" / "codebase_intelligence_db"
     return str(candidate)

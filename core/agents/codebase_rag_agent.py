@@ -2,10 +2,10 @@ import logging
 import os
 from typing import List, Optional
 from langchain_openai import ChatOpenAI
-from langchain_core.messages import HumanMessage, AIMessage
+from langchain_core.messages import HumanMessage
 from langchain_core.language_models.chat_models import BaseChatModel
 from core.agents.system_prompt import SYSTEM_PROMPT
-from core.models import CodeChange, AgentProtocol, ToolCallable, ToolBuilder
+from core.models import CodeChange, AgentProtocol, ToolCallable
 from langchain_chroma import Chroma
 from core.utils.response_formatter import format_response
 from core.agents.build_langgraph_agent import build_langgraph_agent
@@ -21,7 +21,7 @@ class CodebaseRAGAgent(AgentProtocol):
         self.vector_store = vector_store
         self.change_log: List[CodeChange] = []
 
-    async def initialize(self, llm: Optional[BaseChatModel] = None, model_name: Optional[str] = None):
+    async def initialize(self, llm: Optional[BaseChatModel] = None, model_name: Optional[str] = None) -> None:
         """Initialize the agent by preparing tools and other components."""
         self.llm = llm if llm is not None else self.setup_llm(model_name=model_name)
         self.tools: List[ToolCallable] = await get_tools(self)
@@ -30,7 +30,7 @@ class CodebaseRAGAgent(AgentProtocol):
 
     def setup_llm(self, model_name: Optional[str] = None) -> BaseChatModel:
         """Create and return the LLM instance for the agent."""
-        chosen_model = model_name or os.environ.get("LLM_MODEL", "gpt-5-nano")
+        chosen_model = model_name or os.environ.get("LLM_MODEL") or "gpt-5-nano"
         return ChatOpenAI(
             name="codebase-rag-agent",
             model=chosen_model,

@@ -53,6 +53,5 @@ coverage/
 *.tmp
 
 # Ignore project data
-/core/data/projects/*
+/data/*
 change_log.json
-codebase_intelligence_db/

@@ -12,3 +12,6 @@ python -m server
 
 Run the tests
 python -m pytest
+
+Run mypy type checks
+python -m mypy -p server

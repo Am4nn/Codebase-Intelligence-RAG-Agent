@@ -7,6 +7,7 @@ import tempfile
 import webbrowser
 from pathlib import Path
 from typing import Optional
+from langgraph.graph.state import CompiledStateGraph
 
 logger = logging.getLogger(__name__)
 
@@ -24,8 +25,7 @@ def _open_file_with_default_viewer(path: Path) -> None:
         except Exception:
             logger.debug("Fallback webbrowser open also failed for %s", path)
 
-
-def render_graph_png(app) -> bytes:
+def render_graph_png(app: CompiledStateGraph) -> bytes:
     """Return PNG bytes for the agent's state graph.
 
     Raises:
@@ -41,8 +41,7 @@ def render_graph_png(app) -> bytes:
         raise RuntimeError("Rendered graph did not return bytes")
     return bytes(png)
 
-
-def save_graph_png(app, path: Optional[Path | str] = None) -> Path:
+def save_graph_png(app: CompiledStateGraph, path: Optional[Path | str] = None) -> Path:
     """Save the agent graph PNG to disk and return the path.
 
     If path is None, a temporary file is created and returned.
@@ -57,8 +56,7 @@ def save_graph_png(app, path: Optional[Path | str] = None) -> Path:
     p.write_bytes(png)
     return p
 
-
-def display_graph(app, *, open_in_viewer: bool = False) -> Optional[Path]:
+def display_graph(app: CompiledStateGraph, *, open_in_viewer: bool = False) -> Optional[Path]:
     """Display the agent graph.
 
     - In Jupyter: show inline image (returns None).

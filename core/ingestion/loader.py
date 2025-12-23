@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, List, Optional
 from datetime import datetime
 
 from langchain_core.documents import Document
@@ -63,8 +63,8 @@ class CodebaseLoader:
                 try:
                     text = path.read_text(encoding='latin-1')
                 except Exception as e:
-                        logger.warning("⚠️  Skipping unreadable file %s: %s", path, e)
-                        continue
+                    logger.warning("⚠️  Skipping unreadable file %s: %s", path, e)
+                    continue
 
             # Use the CodeParser to split files into logical chunks and attach richer metadata
             try:
@@ -93,7 +93,7 @@ class CodebaseLoader:
                 }
 
                 # Sanitize metadata values so they are safe for vector stores like Chroma
-                def _sanitize_value(v):
+                def _sanitize_value(v: Any) -> str | int | float | bool | None:
                     # Allowed primitive types: str, int, float, bool, None
                     if v is None or isinstance(v, (str, int, float, bool)):
                         return v
