@@ -49,6 +49,50 @@ Open Swagger UI:
 python -m cli
 ```
 
+## Architecture
+
+For the full write-up, see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
+```mermaid
+flowchart LR
+  subgraph Clients
+    CLI["CLI<br/>python -m cli"]
+    HTTP["HTTP Client<br/>/ Swagger UI"]
+    PY["Python App<br/>imports core"]
+  end
+
+  subgraph Server
+    FASTAPI["FastAPI<br/>server/app.py"]
+  end
+
+  subgraph Core
+    CI["CodebaseIntelligence<br/>core/api/codebase_intelligence.py"]
+    ING["Ingestion<br/>loader + parser + chunker"]
+    VS["Vector Store<br/>CodeVectorStore (Chroma)"]
+    AG["Agent<br/>CodebaseRAGAgent"]
+    LG["LangGraph Agent<br/>(create_agent)"]
+    CP["Checkpointer<br/>(InMemorySaver)"]
+    TOOLS["Tools<br/>core/tools/*"]
+  end
+
+  subgraph Storage
+    PROJ["Projects<br/>core/data/projects/*"]
+    CHROMA[("Chroma DB on disk<br/>core/storage/codebase_intelligence_db")]
+  end
+
+  CLI -->|calls| CI
+  PY -->|calls| CI
+  HTTP -->|HTTP| FASTAPI -->|calls| CI
+
+  CI --> ING -->|Documents| VS
+  VS <-->|persist/load| CHROMA
+  ING -->|reads| PROJ
+
+  CI --> AG --> LG
+  LG --> TOOLS
+  LG <--> CP
+```
+
 ## Core library usage
 
 `initialize()` and `query()` are async.
@@ -73,6 +117,8 @@ asyncio.run(main())
 ```
 
 ## API overview
+
+For the full API reference, see [docs/API.md](docs/API.md).
 
 - `POST /query` — ask a question (optionally pass `conversation_id`)
 - `GET /conversations` — list known conversations
