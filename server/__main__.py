@@ -7,9 +7,9 @@ Run this module to start the FastAPI server:
 Or with uvicorn:
     uvicorn server.app:app --reload --port 8000
 """
+import os
 import uvicorn
 from dotenv import load_dotenv
-
 
 def load_env() -> None:
     """Load environment variables from .env file."""
@@ -17,10 +17,12 @@ def load_env() -> None:
 
 if __name__ == '__main__':
     load_env()
+    host = os.getenv("SERVER_HOST", "0.0.0.0")
+    port = int(os.getenv("SERVER_PORT", "8000"))
     uvicorn.run(
         "server.app:app", # module path
-        host="0.0.0.0",
-        port=8000,
+        host=host,
+        port=port,
         reload=True,
         log_level="info"  # Use string instead of int for uvicorn
     )

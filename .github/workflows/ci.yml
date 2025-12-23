@@ -32,6 +32,3 @@ jobs:
           PYTHONPATH: ${{ github.workspace }}
         run: |
           pytest -q
-      - name: Run server
-        run: |
-          python -m server

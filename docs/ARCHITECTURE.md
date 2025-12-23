@@ -13,28 +13,28 @@ This project is a small “codebase intelligence” system that:
 ```mermaid
 flowchart LR
   subgraph Clients
-    CLI[CLI\npython -m cli]
-    HTTP[HTTP Client\n/ Swagger UI]
-    PY[Python App\nimports core]
+    CLI["CLI<br/>python -m cli"]
+    HTTP["HTTP Client<br/>/ Swagger UI"]
+    PY["Python App<br/>imports core"]
   end
 
   subgraph Server
-    FASTAPI[FastAPI\nserver/app.py]
+    FASTAPI["FastAPI<br/>server/app.py"]
   end
 
   subgraph Core
-    CI[CodebaseIntelligence\ncore/api/codebase_intelligence.py]
-    ING[Ingestion\nloader + parser + chunker]
-    VS[Vector Store\nCodeVectorStore (Chroma)]
-    AG[Agent\nCodebaseRAGAgent]
-    LG[LangGraph Agent\n(create_agent)]
-    CP[Checkpointer\n(InMemorySaver)]
-    TOOLS[Tools\ncore/tools/*]
+    CI["CodebaseIntelligence<br/>core/api/codebase_intelligence.py"]
+    ING["Ingestion<br/>loader + parser + chunker"]
+    VS["Vector Store<br/>CodeVectorStore (Chroma)"]
+    AG["Agent<br/>CodebaseRAGAgent"]
+    LG["LangGraph Agent<br/>(create_agent)"]
+    CP["Checkpointer<br/>(InMemorySaver)"]
+    TOOLS["Tools<br/>core/tools/*"]
   end
 
   subgraph Storage
-    PROJ[Projects\ncore/data/projects/*]
-    CHROMA[(Chroma DB on disk)\ncore/storage/codebase_intelligence_db]
+    PROJ["Projects<br/>core/data/projects/*"]
+    CHROMA[("Chroma DB on disk<br/>core/storage/codebase_intelligence_db")]
   end
 
   CLI -->|calls| CI
@@ -196,4 +196,3 @@ If you need persistence across restarts, the checkpointer should be replaced wit
 
 - Logging: Uvicorn may override logging defaults; the server config forces app/core loggers on.
 - Indexing cost: initial embedding/indexing can take time depending on repo size.
-
