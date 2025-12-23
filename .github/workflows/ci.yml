@@ -23,9 +23,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       - name: Run mypy
+        env:
+          PYTHONPATH: ${{ github.workspace }}
         run: |
           python -m mypy -p core -p server -p cli
       - name: Run tests
+        env:
+          PYTHONPATH: ${{ github.workspace }}
         run: |
           pytest -q
       - name: Run server
