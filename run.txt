@@ -1,0 +1,14 @@
+Activate your virtual environment (Windows PowerShell)
+./.venv/Scripts/Activate.ps1
+
+Install dependencies
+pip install -r requirements.txt
+
+Run the cli module
+python -m cli
+
+Run the server module
+python -m server
+
+Run the tests
+python -m pytest
